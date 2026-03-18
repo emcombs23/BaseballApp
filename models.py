@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, create_engine
 from sqlalchemy import Column, Integer, Float, String
 
 database_url = "sqlite:///baseball.db"
@@ -56,8 +56,8 @@ class Team(SQLModel, table=True):
 	R: Optional[int] = None
 	AB: Optional[int] = None
 	H: Optional[int] = None
-	_2B: Optional[int] = Field(default=None, sa_column=Column("2B", Integer))
-	_3B: Optional[int] = Field(default=None, sa_column=Column("3B", Integer))
+	Double: Optional[int] = Field(default=None, sa_column=Column("2B", Integer))
+	Triple: Optional[int] = Field(default=None, sa_column=Column("3B", Integer))
 	HR: Optional[int] = None
 	BB: Optional[int] = None
 	SO: Optional[int] = None
@@ -103,8 +103,8 @@ class Batting(SQLModel, table=True):
 	AB: Optional[int] = None
 	R: Optional[int] = None
 	H: Optional[int] = None
-	_2B: Optional[int] = Field(default=None, sa_column=Column("2B", Integer))
-	_3B: Optional[int] = Field(default=None, sa_column=Column("3B", Integer))
+	Double: Optional[int] = Field(default=None, sa_column=Column("2B", Integer))
+	Triple: Optional[int] = Field(default=None, sa_column=Column("3B", Integer))
 	HR: Optional[int] = None
 	RBI: Optional[int] = None
 	SB: Optional[int] = None
