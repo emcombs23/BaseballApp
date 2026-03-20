@@ -11,6 +11,17 @@ async def get_years():
         years = session.exec(select(Teams.yearID).distinct().order_by(Teams.yearID)).all()
     return years
 
+@app.get("/teams")
+async def get_teams(year: int):
+    with Session(engine) as session:
+        rows = session.exec(
+            select(Teams.name, Teams.divID, Teams.lgID).where(Teams.yearID == year)
+        ).all()
+    # Return a list of dictionaries with explicit keys for the frontend
+    teams = [
+        {"name": row[0],"league": row[2], "division": row[1]} for row in rows
+    ]
+    return teams
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
