@@ -130,3 +130,43 @@ footer {
     font-size: 0.85rem;
     letter-spacing: 1px;
 }
+
+/* Team button (plain-looking but clickable) */
+.team-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.team-button:focus {
+    outline: 2px solid rgba(192,57,43,0.25);
+    outline-offset: 2px;
+}
+
+/* players dropdown */
+.players-dropdown {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #ffffff;
+    border: 1px solid #dde1e7;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    max-height: 220px;
+    overflow: auto;
+}
+.players-dropdown .player-items {
+    list-style: none;
+    padding-left: 0;
+}
+.players-dropdown .player-items li {
+    padding: 0.25rem 0.25rem;
+    border-bottom: 1px dashed #eef2f6;
+    font-size: 0.95rem;
+}
+.players-dropdown .player-items li:last-child {
+    border-bottom: none;
+}
