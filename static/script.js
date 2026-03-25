@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const select = document.getElementById("year-select");
     const teamsList = document.getElementById("teams-list");
+    const playerDetails = document.getElementById('player-details');
     // cache players per year+team to avoid refetching
     const playersCache = new Map();
 
@@ -133,13 +134,78 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const pli = document.createElement('li');
                 const fname = p.first_name || p.nameFirst || '';
                 const lname = p.last_name || p.nameLast || '';
-                pli.textContent = `${fname} ${lname}`.trim();
+                const id = p.playerID || p.playerId || p.player_id || '';
+                const playerBtn = document.createElement('button');
+                playerBtn.type = 'button';
+                playerBtn.className = 'player-button';
+                playerBtn.dataset.playerid = id;
+                playerBtn.textContent = `${fname} ${lname}`.trim() || 'Unknown Player';
+                playerBtn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    console.debug('playerBtn clicked', id);
+                    if (!id) return;
+                    showPlayerDetails(id);
+                });
+                // make the entire list item clickable as a fallback
+                pli.dataset.playerid = id;
+                pli.style.cursor = 'pointer';
+                pli.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    const pid = ev.currentTarget.dataset.playerid;
+                    console.debug('player li clicked', pid);
+                    if (!pid) return;
+                    showPlayerDetails(pid);
+                });
+                pli.appendChild(playerBtn);
                 ul.appendChild(pli);
             });
             dropdown.innerHTML = '';
             dropdown.appendChild(ul);
+            // debug: listen for any clicks inside dropdown
+            dropdown.addEventListener('click', (e) => {
+                console.debug('dropdown click', e.target);
+            });
         } catch (err) {
             dropdown.innerHTML = '<p class="muted">Failed to load players.</p>';
+        }
+    }
+
+    async function showPlayerDetails(playerID) {
+        if (!playerDetails) return;
+        playerDetails.innerHTML = '<p class="muted">Loading player...</p>';
+        try {
+            const [statsRes, bioRes] = await Promise.all([
+                fetch(`/Stats?playerID=${encodeURIComponent(playerID)}`),
+                fetch(`/Bio?playerID=${encodeURIComponent(playerID)}`)
+            ]);
+            if (!statsRes.ok || !bioRes.ok) throw new Error('Network response was not ok');
+            const stats = await statsRes.json();
+            const bio = await bioRes.json();
+            const bioItem = Array.isArray(bio) ? bio[0] : bio;
+            const statsItem = Array.isArray(stats) ? stats[0] : stats;
+
+            let html = '';
+            if (bioItem) {
+                html += `<div class="bio"><h3>${bioItem.first_name || ''} ${bioItem.last_name || ''}</h3>`;
+                html += '<ul class="bio-list">';
+                if (bioItem.birth_year) html += `<li>Born: ${bioItem.birth_year}${bioItem.birth_month ? `-${bioItem.birth_month}` : ''}${bioItem.birth_day ? `-${bioItem.birth_day}` : ''}${bioItem.birth_city ? ` — ${bioItem.birth_city}` : ''}${bioItem.birth_state ? `, ${bioItem.birth_state}` : ''}</li>`;
+                if (bioItem.height) html += `<li>Height: ${bioItem.height}</li>`;
+                if (bioItem.weight) html += `<li>Weight: ${bioItem.weight}</li>`;
+                html += '</ul></div>';
+            }
+
+            if (statsItem) {
+                html += '<div class="stats"><h4>Career Totals</h4><ul class="stats-list">';
+                html += `<li>Games: ${statsItem.games_played ?? statsItem[0] ?? 0}</li>`;
+                html += `<li>Hits: ${statsItem.hits ?? statsItem[1] ?? 0}</li>`;
+                html += `<li>RBI: ${statsItem.rbi ?? statsItem[2] ?? 0}</li>`;
+                html += `<li>Stolen Bases: ${statsItem.stolen_bases ?? statsItem[3] ?? 0}</li>`;
+                html += '</ul></div>';
+            }
+
+            playerDetails.innerHTML = html || '<p class="muted">No details available.</p>';
+        } catch (err) {
+            playerDetails.innerHTML = '<p class="muted">Failed to load player details.</p>';
         }
     }
 
